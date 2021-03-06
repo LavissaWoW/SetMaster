@@ -1,0 +1,257 @@
+<UI xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Frame name="OutfitsCollectionFrameTemplate" parentKey="OutfitsCollectionFrame" setAllPoints="true" hidden="true" mixin="ExtSetsCollectionMixin" virtual="true">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="4" y="-60" />
+			<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-6" y="5" />
+		</Anchors>
+		<Frames>
+			<Frame name="$parentLeftInset" parentKey="LeftInset" inherits="InsetFrameTemplate">
+				<Size x="260" y="496" />
+				<Anchors>
+					<Anchor point="TOPLEFT" />
+					<Anchor point="BOTTOMLEFT" />
+				</Anchors>
+			</Frame>
+			<Frame name="$parentRightInset" parentKey="RightInset" inherits="CollectionsBackgroundTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.LeftInset" relativePoint="TOPRIGHT" x="22" y="0" />
+					<Anchor point="BOTTOMRIGHT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.BGCornerTopRight:Hide();
+						self.BGCornerTopLeft:Hide();					
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="HybridScrollFrameTemplate" mixin="ScrollFrameMixin">
+				<Size x="255" y="499" />
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.LeftInset" x="3" y="-36" />
+				</Anchors>
+				<Scripts>
+					<OnLoad method="OnLoad" />
+					<OnShow method="OnShow" />
+					<OnHide method="OnHide" />
+					<OnEvent method="OnEvent" />
+				</Scripts>
+				<Frames>
+					<Frame name="$parentFavoriteDropDown" parentKey="FavoriteDropDown" inherits="UIDropDownMenuTemplate" />
+					<Slider name="$parentScrollBar" parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="4" y="20" />
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="4" y="8" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.trackBG:Show();
+								self.trackBG:SetVertexColor(0, 0, 0, 0.75);
+							</OnLoad>
+						</Scripts>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+			<DressUpModel parentKey="Model" mixin="SetMasterSetsModelMixin">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="3" y="-3" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.RightInset" relativePoint="BOTTOMRIGHT" x="-4" y="3" />
+				</Anchors>
+				<Scripts>
+					<OnLoad method="OnLoad" />
+					<OnUpdate method="OnUpdate" />
+					<OnMouseDown method="OnMouseDown" />
+					<OnMouseUp method="OnMouseUp" />
+					<OnMouseWheel method="OnMouseWheel" />
+					<OnModelLoaded method="OnModelLoaded" />
+				</Scripts>
+			</DressUpModel>
+			<Frame name="$parentDetailsFrame" parentKey="DetailsFrame" frameLevel="5">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="0" y="-3" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.RightInset" relativePoint="BOTTOMRIGHT" x="-3" y="2" />
+				</Anchors>
+				<Frames>
+					<Frame name="$parentLimitedSet" parentKey="LimitedSet" inherits="ResizeLayoutFrame" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="6" y="-6" />
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture parentKey="Icon" atlas="worldquest-icon-clock" useAtlasSize="true" scale="0.8">
+									<Anchors>
+										<Anchor point="TOPLEFT" />
+									</Anchors>
+								</Texture>
+								<Fontstring parentKey="Text" font="GameFontHighlightSmall">
+									<Color r="1.0" g="0.5" b="0.25" a="1" />
+									<Anchors>
+										<Anchor point="LEFT" relativeKey="$parent.Icon" relativePoint="RIGHT" />
+									</Anchors>
+								</Fontstring>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								GameTooltip:SetOwner(self.Text, "ANCHOR_RIGHT");
+								GameTooltip_SetTitle(GameTooltip, TRANSMOG_SET_LIMITED_TIME_SET_TOOLTIP, NORMAL_FONT_COLOR, true);
+							</OnEnter>
+							<OnLeave function="GameTooltip_Hide" />
+						</Scripts>
+					</Frame>
+					<Button name="$parentButton" parentKey="VariantSetButton" frameLeveL="6" inherits="UIMenuButtonStretchTemplate">
+						<Size x="108" y="22" />
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-6" y="-6" />
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture parentKey="Icon" atlas="friendslist-categorybutton-arrow-down" useAtlasSize="true">
+									<Anchors>
+										<Anchor point="RIGHT" relativeKey="$parent.VariantSetButton" relativePoint="RIGHT" x="-5" y="-2" />
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad> <!-- TODO: Make sure this works -->
+								self.Text:ClearAllPoints();
+								self.Text:SetPoint("LEFT", 11, -1);
+								self.Text:SetSize(75, 10);
+								self.Text:SetJustifyH("LEFT");
+							</OnLoad>
+							<OnClick>
+								ToggleDropDownMenu(1, nil, self:GetParent().VariantSetsDropDown, self:GetName(), 0, 1);
+								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Frame name="$parentDropDown" parentKey="VariantSetsDropDown" inherits="UIDropDownMenuTemplate">
+						<Scripts>
+							<OnLoad function="WardrobeSetsCollectionVariantSetsDropDown_OnLoad" />
+						</Scripts>
+					</Frame>
+				</Frames>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="ModelFadeTexture" atlas="transmog-set-model-cutoff-fade">
+							<Size x="0" y="178" />
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="0" />
+								<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" />
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture parentKey="IconRowBackground" atlas="transmog-set-iconrow-background" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-78" />
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Fontstring parentKey="Name" font="Fancy24Font" maxLines="1">
+							<Size x="380" y="0" />
+							<Color r="1" g="0.82" b="0" a="1" />
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-37" />
+							</Anchors>
+							<Shadow>
+								<Color r="0" g="0" b="0" />
+								<Offset x="1" y="-1" />
+							</Shadow>
+						</Fontstring>
+						<Fontstring parentKey="LongName" font="Fancy16Font" maxLines="2" hidden="true">
+							<Size x="380" y="0" />
+							<Color r="1" g="0.82" b="0" a="1" />
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-30" />
+							</Anchors>
+							<Shadow>
+								<Color r="0" g="0" b="0" />
+								<Offset x="1" y="-1" />
+							</Shadow>
+						</Fontstring>
+						<Fontstring parentKey="Label" font="GameFontHighlight" maxLines="2">
+							<Size x="380" y="0" />
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-63" />
+							</Anchors>
+						</Fontstring>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.itemFramesPool = CreateFramePool("Frame", self, "WardrobeSetsDetailsItemFrameTemplate");
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnShow method="OnShow" />
+			<OnEvent method="OnEvent" />
+		</Scripts>
+	</Frame>
+	<Frame name="OutfitsTransmogFrameTemplate" parentKey="OutfitsTransmogFrame" mixin="SetMasterTransmogOutfitsCollectionMixin" virtual="true">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="4" y="-60" />
+			<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-6" y="5" />
+		</Anchors>
+		<Frames>
+			<DressUpModel name="SetMasterTransmogModelFrame" parentKey="Model" inherits="WardrobeSetsTransmogModelTemplate" frameStrata="HIGH" mixin="OutfitsTransmogButtonModelMixin" hidden="true">
+		    	<Size x="194" y="279"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad method="OnLoad" />
+					<OnModelLoaded method="OnModelLoaded"/>
+					<OnShow method="OnShow" />
+					<OnUpdate method="OnUpdate" />
+				</Scripts>
+			</DressUpModel>
+			<DressUpModel name="SetMasterTransmogItemModelFrame" parentKey="ItemModel" inherits="WardrobeItemsModelTemplate" frameStrata="HIGH" mixin="SetMasterItemTransmogFrameMixin" hidden="true">
+				<Scripts>
+					<OnEnter/>
+					<OnLeave/>
+					<OnUpdate method="OnUpdate"/>
+				</Scripts>
+			</DressUpModel>
+			<Frame name="$parentFilterFrame" parentKey="FilterBar" inherits="OutfitsTransmogFilterBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="5" y="-5" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-29" y="-30" />
+				</Anchors>
+			</Frame>
+		<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="HybridScrollFrameTemplate" mixin="SetMasterTransmogScrollFrameMixin">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeKey="$parent.FilterBar" relativePoint="BOTTOMLEFT" />
+				<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="5" />
+			</Anchors>
+			<Frames>
+				<Slider name="$parentScrollBar" parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-24" y="-16" />
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="13" />
+					</Anchors>
+					<Scripts>
+						<OnLoad>
+							self.trackBG:Show();
+						</OnLoad>
+					</Scripts>
+				</Slider>
+			</Frames>
+			<Scripts>
+				<OnLoad method="OnLoad" />
+				<OnShow method="OnShow" />
+				<OnHide method="OnHide" />
+				<OnEvent method="OnEvent" />
+			</Scripts>
+		</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad" />
+			<!--<OnEvent method="OnEvent" />-->
+		</Scripts>
+	</Frame>
+</UI>

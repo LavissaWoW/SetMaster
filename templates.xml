@@ -1,0 +1,375 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <Frame name="OutfitsTransmogFrameScrollFrameButtonTemplate2" inherits="" virtual="true" mixin="OutfitsTransmogButtonMixin" useParentLevel="true">
+        <Size x="620" y="46"/>
+        <Frames>
+            <Button name="$parentVariantSetsButton" parentKey="VariantSetsButton" inherits="UIMenuButtonStretchTemplate" hidden="true">
+                <Size x="108" y="22" />
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-8" y="-18" />
+                </Anchors>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <Texture atlas="friendslist-categorybutton-arrow-down" useAtlasSize="true">
+                            <Anchors>
+                                <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" x="-5" y="-2" />
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnClick>
+                        ToggleDropDownMenu(1, nil, self:GetParent().VariantSetsDropDown, self:GetName(), 0, 1);
+                        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Frame name="$parentVariantSetsDropdown" parentKey="VariantSetsDropDown" inherits="UIDropDownMenuTemplate" hidden="false">
+                <Scripts>
+                    <OnLoad>
+                        UIDropDownMenu_Initialize(self, function(self)self:GetParent():OpenVariantSetsDropDown();end, "MENU");
+                        UIDropDownMenu_SetAnchor(self, 0, 0, "TOPRIGHT", self:GetParent().VariantSetsButton, "BOTTOMRIGHT")
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+        </Frames>
+        <Layers>
+            <!-- Background and default border tiling-->
+			<Layer level="BACKGROUND"> 
+				<Texture parentKey="Background">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="5" y="-5"/>
+                        <Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
+                    </Anchors>
+					<Color r="0" g="0" b="0"/>
+				</Texture>
+                <Texture parentKey="BgCornerTopLeft" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" />
+                    </Anchors>
+                    <TexCoords left="0.01953125" top="0.0078125" right="0.0390625" bottom="0.02734375"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+                <Texture parentKey="BgLeft" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgCornerTopLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.01953125" top="0.1953125" right="0.0390625" bottom="0.1953125" />
+                    <Size x="10" y="26"/>
+                </Texture>
+                <Texture parentKey="BgCornerBottomLeft" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgLeft" relativePoint="BOTTOMLEFT" />
+                    </Anchors>
+                    <TexCoords left="0.01953125" top="0.357421875" right="0.0390625" bottom="0.376953125"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+
+                <Texture parentKey="BgTop" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgCornerTopLeft" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.125" top="0.0078125" right="0.125" bottom="0.02734375"/>
+                    <Size x="600" y="10"/>
+                </Texture>
+                <Texture parentKey="BgBottom" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.BgCornerBottomLeft" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.125" top="0.357421875" right="0.125" bottom="0.376953125"/>
+                    <Size x="600" y="10"/>
+                </Texture>
+
+
+                <Texture parentKey="BgCornerTopRight" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgTop" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.259765625" top="0.0078125" right="0.279296875" bottom="0.02734375"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+                <Texture parentKey="BgRight" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT" relativeKey="$parent.BgCornerTopRight" relativePoint="BOTTOMRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.259765625" top="0.1953125" right="0.279296875" bottom="0.1953125" />
+                    <Size x="10" y="26"/>
+                </Texture>
+                <Texture parentKey="BgCornerBottomRight" file="Interface\Transmogrify\TransmogSetsVendor">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT" relativeKey="$parent.BgRight" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.259765625" top="0.357421875" right="0.279296875" bottom="0.376953125"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+			</Layer>
+            <!-- Fav Icon -->
+            <Layer level="OVERLAY">
+                <Texture parentKey="Favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Icon" x="-8" y="8"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <!-- Selected Textures -->
+            <Layer level="OVERLAY">
+                <!-- Left selected textures -->
+                <Texture parentKey="SelectedCornerTopLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgCornerTopLeft" relativePoint="TOPLEFT" x="2" y="-2"/>
+                    </Anchors>
+                    <TexCoords left="0.302734375" top="0.396484375" right="0.32421875" bottom="0.41796875"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <Texture parentKey="SelectedLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.SelectedCornerTopLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.302734375" top="0.421875" right="0.32421875" bottom="0.421875"/>
+                    <Size x="12" y="20"/>
+                </Texture>
+                <Texture parentKey="SelectedCornerBottomLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.SelectedLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.302734375" top="0.744140625" right="0.328125" bottom="0.765625"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <!-- Tiling top/bottom selected textures -->
+                <Texture parentKey="SelectedTop" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.SelectedCornerTopLeft" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.33203125" top="0.396484375" right="0.33203125" bottom="0.416015625"/>
+                    <Size x="595" y="10"/>
+                </Texture>
+                <Texture parentKey="SelectedBottom" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.SelectedCornerBottomLeft" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.33203125" top="0.744140625" right="0.33203125" bottom="0.765625"/>
+                    <Size x="595" y="10"/>
+                </Texture>
+                <!-- Right selected textures -->
+                <Texture parentKey="SelectedCornerTopRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.SelectedTop" relativePoint="TOPRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.5390625" top="0.396484375" right="0.5625" bottom="0.419921875"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <Texture parentKey="SelectedRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.SelectedCornerTopRight" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.5390625" top="0.421875" right="0.5625" bottom="0.421875"/>
+                    <Size x="12" y="20"/>
+                </Texture>
+                <Texture parentKey="SelectedCornerBottomRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.SelectedBottom" relativePoint="BOTTOMRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.5390625" top="0.7421875" right="0.5625" bottom="0.765625"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+            </Layer>
+            <!-- Transmogged Taxtures -->
+            <Layer level="OVERLAY">
+                <Texture parentKey="TMedCornerTopLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgCornerTopLeft" relativePoint="TOPLEFT" x="2" y="0"/>
+                    </Anchors>
+                    <TexCoords left="0.587890625" top="0.001953125" right="0.603515625" bottom="0.017578125"/>
+                    <Size x="10" y="9"/>
+                </Texture>
+                <Texture parentKey="TMedLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.TMedCornerTopLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.587890625" top="0.021484375" right="0.603515625" bottom="0.021484375"/>
+                    <Size x="10" y="27"/>
+                </Texture>
+                <Texture parentKey="TMedCornerBottomLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.TMedLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.587890625" top="0.3515625" right="0.60546875" bottom="0.37109375"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+                <!-- Tiling top/bottom highlight textures -->
+                <Texture parentKey="TMedTop" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.TMedCornerTopLeft" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.611328125" top="0.001953125" right="0.611328125" bottom="0.017578125"/>
+                    <Size x="599" y="9"/>
+                </Texture>
+                <Texture parentKey="TMedBottom" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.TMedCornerBottomLeft" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.611328125" top="0.3515625" right="0.611328125" bottom="0.37109375"/>
+                    <Size x="599" y="9"/>
+                </Texture>
+                <!-- Right highlight textures -->
+                <Texture parentKey="TMedCornerTopRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.TMedTop" relativePoint="TOPRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.830078125" top="0.001953125" right="0.84765625" bottom="0.017578125"/>
+                    <Size x="10" y="9"/>
+                </Texture>
+                <Texture parentKey="TMedRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.TMedCornerTopRight" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.830078125" top="0.025390625" right="0.84765625" bottom="0.025390625"/>
+                    <Size x="10" y="27"/>
+                </Texture>
+                <Texture parentKey="TMedCornerBottomRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.TMedBottom" relativePoint="BOTTOMRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.830078125" top="0.353515625" right="0.84765625" bottom="0.37109375"/>
+                    <Size x="10" y="10"/>
+                </Texture>
+            </Layer>
+            <!-- Fonts, icons etc -->
+            <Layer level="ARTWORK">
+                <Texture parentKey="Icon">
+                    <Size x="1" y="38"/> <!--38-->
+                    <Anchors>
+                        <Anchor point="LEFT" x="5" y="0"/>
+                    </Anchors>
+                </Texture>
+                <Fontstring parentKey="Name" inherits="GameFontNormal" justifyH="LEFT" maxLines="1">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="8" y="-5"/>
+                    </Anchors>
+                </Fontstring>
+                <Fontstring parentKey="Variant" inherits="GameFontNormal" maxlines="1">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Name" relativePoint="TOPRIGHT" x="3" />
+                    </Anchors>
+                </Fontstring>
+                <Fontstring parentKey="NumVariants" inherits="GameFontNormal" maxLines="1">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Variant" relativePoint="TOPRIGHT" x="3" />
+                    </Anchors>
+                    <Color r="1" g="1" b="1" a="1" />
+                </Fontstring>
+                <Fontstring parentKey="Label" inherits="GameFontDisableSmallLeft" justifyH="RIGHT" maxLines="1">
+                    <Anchors>
+                        <Anchor point="BOTTOM" relativeKey="$parent.Name" relativePoint="BOTTOM"/>
+                        <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" x="-8"/>
+                    </Anchors>
+                </Fontstring>
+            </Layer>
+            <!-- Hover textures -->
+            <Layer level="HIGHLIGHT">
+                <!-- Left highlight textures -->
+                <Texture parentKey="HoverCornerTopLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BgCornerTopLeft" relativePoint="TOPLEFT" x="2" y="-2"/>
+                    </Anchors>
+                    <TexCoords left="0.564453125" top="0.396484375" right="0.58984375" bottom="0.423828125"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <Texture parentKey="HoverLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.HoverCornerTopLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.564453125" top="0.44140625" right="0.58984375" bottom="0.44140625"/>
+                    <Size x="12" y="20"/>
+                </Texture>
+                <Texture parentKey="HoverCornerBottomLeft" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.HoverLeft" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.564453125" top="0.740234375" right="0.591796875" bottom="0.765625"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <!-- Tiling top/bottom highlight textures -->
+                <Texture parentKey="HoverTop" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.HoverCornerTopLeft" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.599609375" top="0.396484375" right="0.599609375" bottom="0.421875"/>
+                    <Size x="595" y="10"/>
+                </Texture>
+                <Texture parentKey="HoverBottom" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.HoverCornerBottomLeft" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                    <TexCoords left="0.599609375" top="0.740234375" right="0.599609375" bottom="0.765625"/>
+                    <Size x="595" y="10"/>
+                </Texture>
+                <!-- Right highlight textures -->
+                <Texture parentKey="HoverCornerTopRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.HoverTop" relativePoint="TOPRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.798828125" top="0.396484375" right="0.82421875" bottom="0.421875"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+                <Texture parentKey="HoverRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.HoverCornerTopRight" relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.798828125" top="0.42578125" right="0.82421875" bottom="0.42578125"/>
+                    <Size x="12" y="20"/>
+                </Texture>
+                <Texture parentKey="HoverCornerBottomRight" file="Interface\Transmogrify\TransmogSetsVendor" alphamode="ADD">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.HoverBottom" relativePoint="BOTTOMRIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.798828125" top="0.740234375" right="0.82421875" bottom="0.765625"/>
+                    <Size x="12" y="12"/>
+                </Texture>
+            </Layer>
+        </Layers>
+		<Scripts>
+            <OnLoad method="OnLoad" />
+            <OnShow method="OnShow" />
+            <OnEvent method="OnEvent" />
+            <OnLeave method="OnLeave" />
+            <Onenter method="OnEnter" />
+			<OnMouseUp>
+				if ( button == "LeftButton" ) then
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+					self:GetParent():GetParent():GetParent():SelectSetFromButton(self.baseSetID);
+				elseif ( button == "RightButton" ) then
+					local dropDown = self:GetParent():GetParent().FavoriteDropDown;
+					dropDown.baseSetID = self.setID;
+					ToggleDropDownMenu(1, nil, dropDown, self, 0, 0);
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+				end
+			</OnMouseUp>
+		</Scripts>
+    </Frame>
+
+    <Frame name="OutfitsTransmogFilterBar" virtual="true" hidden="false">
+        <Size y="150" />
+        <Layers>
+            <Layer level="ARTWORK">
+                <Texture>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="0" y="0"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+                    </Anchors>            
+                </Texture>
+            </Layer>
+        </Layers>
+    </Frame>
+    <Frame name="SetMasterTransmogSetsIconFrame" virtual="true" hidden="true">
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture name="$parentRed" parentKey="Red" file="Interface\Buttons\UI-QuickslotRed" hidden="true">
+                </Texture>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnLeave function="TransmogItemFrame_OnLeave"/>
+        </Scripts>
+    </Frame>
+</Ui>
