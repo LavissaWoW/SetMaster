@@ -189,6 +189,7 @@
 		</Frames>
 		<Scripts>
 			<OnShow method="OnShow" />
+			<OnHide method="OnHide" />
 			<OnEvent method="OnEvent" />
 		</Scripts>
 	</Frame>
@@ -211,10 +212,12 @@
 				</Scripts>
 			</DressUpModel>
 			<DressUpModel name="SetMasterTransmogItemModelFrame" parentKey="ItemModel" inherits="WardrobeItemsModelTemplate" frameStrata="HIGH" mixin="SetMasterItemTransmogFrameMixin" hidden="true">
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativeTo="GameTooltip" relativePoint="BOTTOMLEFT" x="-5" y="5" />
+				</Anchors>
 				<Scripts>
 					<OnEnter/>
 					<OnLeave/>
-					<OnUpdate method="OnUpdate"/>
 				</Scripts>
 			</DressUpModel>
 			<Frame name="$parentFilterFrame" parentKey="FilterBar" inherits="OutfitsTransmogFilterBar">
@@ -223,35 +226,85 @@
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-29" y="-30" />
 				</Anchors>
 			</Frame>
-		<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="HybridScrollFrameTemplate" mixin="SetMasterTransmogScrollFrameMixin">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeKey="$parent.FilterBar" relativePoint="BOTTOMLEFT" />
-				<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="5" />
-			</Anchors>
-			<Frames>
-				<Slider name="$parentScrollBar" parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-24" y="-16" />
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="13" />
-					</Anchors>
-					<Scripts>
-						<OnLoad>
-							self.trackBG:Show();
-						</OnLoad>
-					</Scripts>
-				</Slider>
-			</Frames>
-			<Scripts>
-				<OnLoad method="OnLoad" />
-				<OnShow method="OnShow" />
-				<OnHide method="OnHide" />
-				<OnEvent method="OnEvent" />
-			</Scripts>
-		</ScrollFrame>
+			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="HybridScrollFrameTemplate" mixin="SetMasterTransmogScrollFrameMixin">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.FilterBar" relativePoint="BOTTOMLEFT" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" y="5" />
+				</Anchors>
+				<Frames>
+					<Slider name="$parentScrollBar" parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-24" y="-16" />
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" y="13" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.trackBG:Show();
+							</OnLoad>
+						</Scripts>
+					</Slider>
+				</Frames>
+				<Scripts>
+					<OnLoad method="OnLoad" />
+					<OnShow method="OnShow" />
+					<OnHide method="OnHide" />
+					<OnEvent method="OnEvent" />
+				</Scripts>
+			</ScrollFrame>
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad" />
-			<!--<OnEvent method="OnEvent" />-->
+			<OnShow method="OnShow" />
+			<OnHide method="OnHide" />
 		</Scripts>
 	</Frame>
+	<ContainedAlertFrame name="SetMasterTransmogToastTemplate" parent="UIParent" frameStrata="DIALOG" inherits="AlertFrameTemplate" virtual="true" hidden="true">
+		<Size x="253" y="75" />
+		<Anchors>
+			<Anchor point="TOP" y="-25" />
+		</Anchors>
+		<Animations>
+		<AnimationGroup parentKey="animIn">
+			<Alpha fromAlpha="1" toAlpha="0" duration="0" order="1"/>
+			<Alpha fromAlpha="0" toAlpha="1" duration="0.2" order="2"/>
+		</AnimationGroup>
+		<AnimationGroup parentKey="waitAndAnimOut">
+			<Alpha startDelay="4.05" fromAlpha="1" toAlpha="0" duration="1.5" parentKey="animOut">
+			<Scripts>
+				<OnFinished>
+				self:GetRegionParent():Hide();
+				</OnFinished>
+			</Scripts>
+			</Alpha>
+		</AnimationGroup>
+		</Animations>
+		<Layers>
+			<Layer level="ARTWORK">
+			<!-- file="Interface\Transmogrify\TransmogToast.blp"-->
+				<Texture atlas="transmog-toast-bg" useAtlasSize="true" />
+			</Layer>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Icon">
+					<Size x="43" y="43" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="16" y="-17" />
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Fontstring parentKey="Heading" inherits="GameFontNormal" text="Appearance earned">
+					<Size x="176" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Icon" relativePoint="TOPRIGHT" x="1" y="-3" justifyH="CENTER" />
+					</Anchors>
+				</Fontstring>
+				<Fontstring parentKey="Count" inherits="GameFontNormal" text="Part of X sets">
+					<Size x="176" />
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.Icon" relativePoint="BOTTOMRIGHT" x="1" y="3" justifyH="CENTER" />
+					</Anchors>
+				</Fontstring>
+			</Layer>
+		</Layers>
+	</ContainedAlertFrame>
 </UI>

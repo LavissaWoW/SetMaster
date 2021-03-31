@@ -1,11 +1,11 @@
-## Interface: 90002
+## Interface: 90005
 ## Title: SetMaster
 ## Version: 0.1
 ## Author: Lavissa
 ## Notes: A powerful extension to transmog oppurtunities
 ## SavedVariables: SetMasterDB
 ## LoadOnDemand: 0
-# Dependencies: Blizzard_Collections |  Dependded on for the loading of this addon,
+# Dependencies: Blizzard_Collections |  Depended on for the loading of this addon,
 #                                       but it requires information not available
 #                                       before PLAYER_LOGIN is fired, thus can't be
 #                                       loaded before this addon
@@ -15,6 +15,7 @@ embeds.xml
 utils.lua
 DataProvider.lua
 sets.lua
+newSets.lua
 SetsTab.lua
 TransmogTab.lua
 SetMaster.xml

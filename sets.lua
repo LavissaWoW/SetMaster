@@ -54,25 +54,19 @@ DB.setSources = {
 }
 
 DB.itemSlots = {
-	'Head', -- 1
-	'Neck', -- 2
-	'Shoulder', -- 3
-	'Shirt', -- 4
-	'Chest', -- 5
-	'Belt', -- 6
-	'Legs', -- 7
-	'Feet', -- 8
-	'Wrist', -- 9
-	'Gloves', -- 10
-	'Finger 1', -- 11
-	'Finger 2', -- 12
-	'Trinket 1', -- 13
-	'Trinket 2', -- 14
-	'Back', -- 15
-	'Main Hand', -- 16
-	'Off Hand', -- 17
-	'Ranged', -- 18
-	'Tabard' -- 19
+	[1] = 'HEADSLOT',
+	[3] = 'SHOULDERSLOT', -- 3
+	[4] = 'SHIRTSLOT', -- 4
+	[5] = 'CHESTSLOT', -- 5
+	[6] = 'WAISTSLOT', -- 6
+	[7] = 'LEGSSLOT', -- 7
+	[8] = 'FEETSLOT', -- 8
+	[9] = 'WRISTSLOT', -- 9
+	[10] = 'HANDSSLOT', -- 10
+	[15] = 'BACKSLOT', -- 15
+	[16] = 'MAINHANDSLOT', -- 16
+	[17] = 'SECONDARYHANDSLOT', -- 17
+	[19] = 'TABARDSLOT' -- 19
 
 }
 
@@ -106,7 +100,8 @@ DB.allSets = {
 		items = {
 			[3] = {7523},
 			[5] = {7518}, 
-			[6] = {12083, 12466, 24255}
+			[6] = {12083, 12466, 24255},
+			[16] = {81691}
 		},
 	},
 	{ -- 2

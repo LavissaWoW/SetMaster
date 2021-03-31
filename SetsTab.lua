@@ -179,12 +179,12 @@ local function MyWardrobeSetsCollectionScrollFrame_FavoriteDropDownInit(self)
 		end
 	end
 
-	UIDropDownMenu_AddButton(info, level);
+	UIDropDownMenu_AddButton(info);
 	info.disabled = nil;
 
 	info.text = CANCEL;
 	info.func = nil;
-	UIDropDownMenu_AddButton(info, level);
+	UIDropDownMenu_AddButton(info);
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ function ScrollFrameMixin:Update()
 end
 
 ----------------------------------------------------------------------------------------------------------
--- Appearances collection tab Model Frame 
+-- Appearances collection tab Model Frame
 ----------------------------------------------------------------------------------------------------------
 
 SetMasterSetsModelMixin = {};
@@ -284,13 +284,13 @@ function SetMasterSetsModelMixin:OnLoad()
 	self:RegisterEvent("UI_SCALE_CHANGED");
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
 	self:FreezeAnimation(0, 0, 0);
-	self:SetAutoDress(false)
-	self:SetUnit("player")
+	self:SetAutoDress(false);
+	self:SetUnit("player");
 	self:UpdatePanAndZoomModelType();
-	self:SetLight(true, false, -1, 0, 0, .7, .7, .7, .7, .6, 1, 1, 1)
+	self:SetLight(true, false, -1, 0, 0, .7, .7, .7, .7, .6, 1, 1, 1);
 	local x, y, z = self:TransformCameraSpaceToModelSpace(0, 0, -0.25);
 	self:SetPosition(x, y, z);
-	self:RefreshCameras()
+	self:RefreshCameras();
 end
 
 -- Using Blizzard's own model control functions.
@@ -353,7 +353,6 @@ end
 ExtSetsCollectionMixin = {};
 
 function ExtSetsCollectionMixin:OnEvent(event, ...)
-	print("Event Triggered:", event, "Args:", ...)
 	if ( event == "GET_ITEM_INFO_RECEIVED" ) then
 		local itemID = ...;
 		for itemFrame in self.DetailsFrame.itemFramesPool:EnumerateActive() do
@@ -388,20 +387,28 @@ function ExtSetsCollectionMixin:OnShow()
 		self.init = true;
 		self.selectedVariantSets = {}
 		if (self.baseSets and self.baseSets[1]) then
-			self:SelectSet(self:GetDefaultSetIDForBaseSet(baseSets[1].setID));
+			self:SelectSet(self:GetDefaultSetIDForBaseSet(self.baseSets[1].setID));
 		end
 	else
 		self:Refresh();
 	end
 
 	if (not self.selectedSetID) then
-		self.selectedSetID = self:GetDefaultSetIDForBaseSet(DP:GetBaseSets()[1].setID)
+		local baseSets = DP:GetBaseSets();
+		self.selectedSetID = self:GetDefaultSetIDForBaseSet(baseSets[1] and baseSets[1].setID or 0)
 	end
 	self:UpdateProgressBar()
 	self.ScrollFrame:Update()
 	self.ScrollFrame.update = self.ScrollFrame.Update
 	self:DisplaySet(self:GetSelectedSetID())
 
+end
+
+function ExtSetsCollectionMixin:OnHide()
+	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_ITEM_UPDATE");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_UPDATED");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_SOURCE_ADDED");
 end
 
 function ExtSetsCollectionMixin:UpdateProgressBar()
@@ -425,7 +432,7 @@ function ExtSetsCollectionMixin:AddBlizzardMixins()
 		SetAppearanceTooltip = WardrobeSetsCollectionMixin.SetAppearanceTooltip,
 		SetItemFrameQuality = WardrobeSetsCollectionMixin.SetItemFrameQuality,
 		CanHandleKey = WardrobeSetsCollectionMixin.CanHandleKey,
-		})
+		});
 end
 
 -- Handles keypresses for up and down 
@@ -586,13 +593,16 @@ end
 
 function ExtSetsCollectionMixin:GetDefaultSetIDForBaseSet(baseSetID)
 	if (not baseSetID) then
-		print("No baseSetID")
+		return nil;
 	end
 	if ( self.selectedVariantSets[baseSetID] ) then
 		return self.selectedVariantSets[baseSetID];
 	end
 
 	local baseSet = DP:GetBaseSetByID(baseSetID);
+	if (baseSet == nil) then
+		return nil;
+	end
 	if ( baseSet.favoriteSetID ) then
 		return baseSet.favoriteSetID;
 	end

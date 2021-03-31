@@ -19,10 +19,31 @@ function SetsDataProvider:AddBlizzardMixins()
 		GetIconForSet = WardrobeSetsDataProviderMixin.GetIconForSet,
 		GetSortedSetSources = WardrobeSetsDataProviderMixin.GetSortedSetSources,
 		ResetBaseSetNewStatus = WardrobeSetsDataProviderMixin.ResetBaseSetNewStatus,
-		GetIconForSet = WardrobeSetsDataProviderMixin.GetIconForSet,
 		DetermineFavorites = WardrobeSetsDataProviderMixin.DetermineFavorites,
 		RefreshFavorites = WardrobeSetsDataProviderMixin.RefreshFavorites,
 		});
+end
+
+function SetsDataProvider:ScanEquipped()
+	if (not self.equippedItems) then
+		self.equippedItems = {};
+	end
+	for idx, name in pairs(DB.itemSlots) do
+		local loc = TransmogUtil.CreateTransmogLocation(name, Enum.TransmogType.Appearance, Enum.TransmogModification.None);
+		local baseSourceID, baseVisualID, appliedSourceID, appliedVisualID, appliedCategoryID, pendingSourceID, pendingVisualID, pendingCategoryID, hasUndo, isHideVisual, itemSubclass = C_Transmog.GetSlotVisualInfo(loc)
+		self.equippedItems[idx] = appliedVisualID;
+	end
+end
+
+function SetsDataProvider:GetEquippedVisual(slot)
+	return self.equippedItems[slot];
+end
+
+function SetsDataProvider:GetPendingVisual(slot)
+	local slotName = DB.itemSlots[slot];
+	local loc = TransmogUtil.CreateTransmogLocation(slotName, Enum.TransmogType.Appearance, Enum.TransmogModification.None);
+	local baseSourceID, baseVisualID, appliedSourceID, appliedVisualID, appliedCategoryID, pendingSourceID, pendingVisualID, pendingCategoryID, hasUndo, isHideVisual, itemSubclass = C_Transmog.GetSlotVisualInfo(loc)
+	return pendingVisualID, hasUndo;
 end
 
 function SetsDataProvider:SortSets(sets, reverseUIOrder, IgnorePatchID)
@@ -44,6 +65,9 @@ function SetsDataProvider:SortSets(sets, reverseUIOrder, IgnorePatchID)
 end
 
 function SetsDataProvider:OnLoad()
+	for i, item in ipairs(SetMasterSets) do
+		DB.allSets[item.setID] = item;
+	end
 	self.playerClass = select(3, UnitClass("player"));
 	self.playerLevel = UnitLevel("player");
 	self.armorType = DB.classes[self.playerClass].armor;
@@ -52,12 +76,24 @@ function SetsDataProvider:OnLoad()
 	self.filters.expansion = {};
 	self:GetBaseSets();
 	self:CreateItemIndex();
+	self:ScanEquipped();
+	local EventFrame = CreateFrame("Frame", nil, UIParent);
+    EventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
+    EventFrame:RegisterEvent("TRANSMOGRIFY_SUCCESS");
+	EventFrame:SetScript("OnEvent", SetsDataProvider_OnEvent);
+end
+
+function SetsDataProvider_OnEvent(self, event, ...)
+	if (event == "PLAYER_EQUIPMENT_CHANGED" or event == "TRANSMOGRIFY_SUCCESS") then
+		DP:ScanEquipped();
+		OutfitsTransmogFrame.ScrollFrame:Update();
+	end
 end
 
 function SetsDataProvider:CreateItemIndex()
 	self.itemToSetList = {};
 	self.newSetStatusList = {};
-	
+
 	local sets = self:GetBaseSets();
 	local count = 0;
 	for _, set in pairs(sets) do
@@ -76,6 +112,12 @@ function SetsDataProvider:CreateItemIndex()
 		end
 	end
 	print("Number of items:", count);
+end
+
+function SetsDataProvider:GetSourceNumSets(sourceID)
+	local sourceInfo = C_TransmogCollection.GetSourceInfo(sourceID);
+	local setIDs = self.itemToSetList[sourceInfo.itemID];
+	return setIDs and #setIDs or 0;
 end
 
 function SetsDataProvider:NewSourceAdded(sourceID)
@@ -104,7 +146,7 @@ end
 
 -- GetBaseSetByID reused from Blizzard's code.
 
--- Used for transmog tab. 
+-- Used for transmog tab.
 function SetsDataProvider:GetUsableSets()
 	if (not self.usableSets) then
 		self.usableSets = self:C_GetUsableSets();
@@ -112,7 +154,7 @@ function SetsDataProvider:GetUsableSets()
 
 		for i, set in ipairs(self.usableSets) do
 			if (false) then -- TODO: Implement favorites
-				local baseSetID = set.baseSetID or base.setID;
+				local baseSetID = set.baseSetID or set.setID;
 				local numRelatedSets = 0;
 				for j = i + 1, #self.usableSets do
 					if (self.usableSets[j].baseSetID == baseSetID or self.usableSets[j].setID == baseSetID) then
@@ -268,9 +310,11 @@ function SetsDataProvider:C_GetBaseSets()
 
 			-- Filtering base sets based on user chosen filters
 			local filtered = false
-			for idx, srcType in ipairs(set.sourceTypes) do
-				if (self.filters.sourceType[srcType]) then
-					filtered = true
+			if (set.sourceTypes) then
+				for idx, srcType in ipairs(set.sourceTypes) do
+					if (self.filters.sourceType[srcType]) then
+						filtered = true
+					end
 				end
 			end
 			if self.filters.expansion[set.expansionID] then
@@ -420,9 +464,9 @@ function SetsDataProvider:C_SetIsFavorite(setID, status)
 end
 
 function SetsDataProvider:C_GetBaseSetsCounts()
-	local baseSets = self:GetBaseSets()
+	local baseSets = self:GetBaseSets();
 
-	numCollected = 0
+	local numCollected = 0;
 
 	for _, set in pairs(baseSets) do
 		local setData = self:GetBaseSetData(set.setID)
@@ -431,7 +475,7 @@ function SetsDataProvider:C_GetBaseSetsCounts()
 		end
 	end
 
-	return numCollected, #baseSets
+	return numCollected, #baseSets;
 end
 
 function SetsDataProvider:C_SetFilter(filter, value)

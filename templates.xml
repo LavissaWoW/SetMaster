@@ -32,6 +32,33 @@
                     </OnLoad>
                 </Scripts>
             </Frame>
+            <Button parentKey="ApplyButton" inherits="UIPanelButtonTemplate" text="Apply All" hidden="true">
+                <Size x="108" y="22" />
+                <Anchors>
+                    <Anchor point="BOTTOMRIGHT" x="-7" y="7" />
+                </Anchors>
+                <Scripts>
+                    <OnMouseDown function="ApplyButton_OnMouseDown" />
+                </Scripts>
+            </Button>
+            <Button parentKey="AddButton" inherits="UIPanelButtonTemplate" text="Add" hidden="true">
+                <Size x="100" y="22" />
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="10" y="7" />
+                </Anchors>
+                <Scripts>
+                    <OnMouseDown function="AddButton_OnMouseDown" />
+                </Scripts>
+            </Button>
+            <Button parentKey="RemoveButton" inherits="UIPanelButtonTemplate" text="Remove" hidden="true">
+                <Size x="100" y="22" />
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="3" relativeKey="$parent.AddButton" relativePoint="BOTTOMRIGHT" />
+                </Anchors>
+                <Scripts>
+                    <OnMouseDown function="RemoveButton_OnMouseDown" />
+                </Scripts>
+            </Button>
         </Frames>
         <Layers>
             <!-- Background and default border tiling-->
@@ -364,11 +391,41 @@
     <Frame name="SetMasterTransmogSetsIconFrame" virtual="true" hidden="true">
         <Layers>
             <Layer level="OVERLAY">
-                <Texture name="$parentRed" parentKey="Red" file="Interface\Buttons\UI-QuickslotRed" hidden="true">
+                <Texture name="$parentRed" parentKey="Red" file="Interface\Buttons\UI-QuickslotRed" hidden="true" />
+            </Layer>
+            <Layer level="OVERLAY">
+                <Texture parentKey="Glow" file="Interface\Transmogrify\Textures.png" hidden="true">
+                    <Size x="40" y="40" />
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                    <TexCoords left="0.52343750" right="0.97656250" top="0.38476563" bottom="0.49609375"/>
                 </Texture>
             </Layer>
+            <Layer level="OVERLAY" textureSubLevel="2">
+                <Texture parentKey="Ants" file="Interface\Transmogrify\PurpleIconAlertAnts.png" hidden="true">
+                    <Size x="31" y="31"/>
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+			<Layer level="OVERLAY" textureSubLevel="2" useParentLevel="true">
+				<Texture parentKey="StatusBorder" atlas="transmog-frame-small-pink" useAtlasSize="true" hidden="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+                <Texture parentKey="Undo" atlas="transmog-icon-revert-small" useAtlasSize="true" hidden="true">
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </Texture>
+			</Layer>
         </Layers>
         <Scripts>
+            <OnUpdate function="TransmogItemFrame_OnUpdate" />
+            <OnMouseDown function="TransmogItemFrame_OnMouseDown" />
             <OnLeave function="TransmogItemFrame_OnLeave"/>
         </Scripts>
     </Frame>

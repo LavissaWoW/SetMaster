@@ -13,13 +13,11 @@ local EXPANDED_BUTTON_HEIGHT = 86;
 
 function SetMasterTransmogScrollFrameMixin:AddBlizzardMixins()
 	Mixin(self, {
-		--OnShow = WardrobeSetsCollectionScrollFrameMixin.OnShow,
 		OnHide = WardrobeSetsCollectionScrollFrameMixin.OnHide,
-		OnEvent = WardrobeSetsCollectionScrollFrameMixin.OnEvent,
 		SetItemFrameQuality = WardrobeSetsCollectionMixin.SetItemFrameQuality,
         SetAppearanceTooltip = WardrobeSetsCollectionMixin.SetAppearanceTooltip,
         RefreshAppearanceTooltip = ExtSetsCollectionMixin.RefreshAppearanceTooltip
-		})
+		});
 end
 
 function SetMasterTransmogScrollFrameMixin:OnShow()
@@ -27,10 +25,14 @@ function SetMasterTransmogScrollFrameMixin:OnShow()
 	self:RegisterEvent("TRANSMOG_COLLECTION_ITEM_UPDATE");
 	self:RegisterEvent("TRANSMOG_COLLECTION_UPDATED");
 	self:RegisterEvent("TRANSMOG_COLLECTION_SOURCE_ADDED");
+    self:RegisterEvent("TRANSMOGRIFY_UPDATE");
     self:Update();
 end
 
-function SetMasterTransmogScrollFrameMixin:OnEvent(event)
+function SetMasterTransmogScrollFrameMixin:OnEvent(event, ...)
+	if ( event == "TRANSMOG_SETS_UPDATE_FAVORITE" ) then
+		DP:RefreshFavorites();
+	end
     self:Update();
 end
 
@@ -67,10 +69,16 @@ function SetMasterTransmogScrollFrameMixin:Update()
 			local topSourcesCollected, topSourcesTotal = DP:GetSetSourceTopCounts(baseSet.setID);
 			local setCollected = (topSourcesCollected == topSourcesTotal);
             local color = IN_PROGRESS_FONT_COLOR;
+            button.ApplyButton:Enable();
+            button.AddButton:Enable();
+            button.RemoveButton:Enable();
 			if ( setCollected ) then
 				color = NORMAL_FONT_COLOR;
 			elseif ( topSourcesCollected == 0 ) then
 				color = GRAY_FONT_COLOR;
+                button.ApplyButton:Disable();
+                button.AddButton:Disable();
+                button.RemoveButton:Disable();
             end
 
             if (baseSet.setID == selectedBaseSetID) then
@@ -130,6 +138,30 @@ function SetMasterTransmogOutfitsCollectionMixin:OnLoad()
 
 end
 
+function SetMasterTransmogOutfitsCollectionMixin:OnShow()
+	self:RegisterEvent("GET_ITEM_INFO_RECEIVED");
+	self:RegisterEvent("TRANSMOG_COLLECTION_ITEM_UPDATE");
+	self:RegisterEvent("TRANSMOG_COLLECTION_UPDATED");
+	self:RegisterEvent("TRANSMOG_COLLECTION_SOURCE_ADDED");
+
+    self:UpdateProgressBar();
+end
+
+function SetMasterTransmogOutfitsCollectionMixin:OnHide()
+	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_ITEM_UPDATE");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_UPDATED");
+	self:UnregisterEvent("TRANSMOG_COLLECTION_SOURCE_ADDED");
+end
+
+function SetMasterTransmogOutfitsCollectionMixin:OnSearchUpdate()
+	DP:SetSearch(WardrobeCollectionFrameSearchBox:GetText())
+    DP:ClearBaseSets();
+    DP:ClearVariantSets();
+    DP:ClearUsableSets();
+    self.ScrollFrame:Update();
+end
+
 function SetMasterTransmogOutfitsCollectionMixin:AddBlizzardMixins()
     Mixin(self, {
         RefreshCameras = WardrobeSetsTransmogMixin.RefreshCameras,
@@ -137,7 +169,7 @@ function SetMasterTransmogOutfitsCollectionMixin:AddBlizzardMixins()
         GetDefaultSetIDForBaseSet = ExtSetsCollectionMixin.GetDefaultSetIDForBaseSet,
         GetSelectedSetID = WardrobeSetsCollectionMixin.GetSelectedSetID,
         SelectSet = ExtSetsCollectionMixin.SelectSet,
-    })
+    });
 end
 
 function SetMasterTransmogOutfitsCollectionMixin:UpdateProgressBar()
@@ -161,20 +193,6 @@ function TransmogItemFrame_OnEnter(self)
     self:GetParent():SetAppearanceTooltip(self);
 
     ItemModel = _G["SetMasterTransmogItemModelFrame"];
-    ItemModel.slot = 
-	self:SetScript("OnUpdate",
-		function()
-            if IsModifiedClick("DRESSUP") then
-                ItemModel:SetFrameStrata("HIGH")
-                ItemModel:EnableMouse(false)
-                ItemModel:Show();
-				--ShowInspectCursor();
-			else
-                ItemModel:Hide();
-				ResetCursor();
-			end
-		end
-    );
 	if ( self.New:IsShown() ) then
 		local transmogSlot = C_Transmog.GetSlotForInventoryType(self.invType);
 		local setID = WardrobeCollectionFrame.SetsCollectionFrame:GetSelectedSetID();
@@ -188,9 +206,29 @@ end
 function TransmogItemFrame_OnLeave(self)
     ItemModel = _G["SetMasterTransmogItemModelFrame"];
     ItemModel:Hide();
-	self:SetScript("OnUpdate", nil);
 	ResetCursor();
 	WardrobeCollectionFrame_HideAppearanceTooltip();
+end
+
+function TransmogItemFrame_OnUpdate(self, elapsed)
+    if(self.Glow:IsShown()) then
+        AnimateTexCoords(self.Ants, 256, 256, 48, 48, 22, elapsed, 0.01);
+    end
+    ItemModel = _G["SetMasterTransmogItemModelFrame"];
+    local itemFrame = GetMouseFocus();
+    if IsModifiedClick("DRESSUP") then
+        if (itemFrame and itemFrame.invType) then
+            ItemModel:SetFrameStrata("HIGH")
+            ItemModel:EnableMouse(false)
+            ItemModel:Show();
+            --ShowInspectCursor();
+        end
+    else
+        if (itemFrame and itemFrame.invType) then
+            ItemModel:Hide();
+            ResetCursor();
+        end
+    end
 end
 
 OutfitsTransmogButtonMixin = {};
@@ -249,7 +287,6 @@ end
 
 function OutfitsTransmogButtonMixin:OnLeave()
     local Model = _G["SetMasterTransmogModelFrame"];
-    --Model.setID = nil;
     Model:Hide();
 end
 
@@ -277,24 +314,30 @@ end
 
 function OutfitsTransmogButtonMixin:Expand()
     local largeButtonHeight = self:GetParent():GetParent().largeButtonHeight;
-    self:SetHeight(largeButtonHeight)
-    self.BgLeft:SetHeight(largeButtonHeight - self.BgCornerTopLeft:GetHeight() - self.BgCornerBottomLeft:GetHeight())
-    self.BgRight:SetHeight(largeButtonHeight - self.BgCornerTopRight:GetHeight() - self.BgCornerBottomRight:GetHeight())
-    self.SelectedLeft:SetHeight(largeButtonHeight - self.SelectedCornerTopLeft:GetHeight() - self.SelectedCornerBottomLeft:GetHeight())
-    self.SelectedRight:SetHeight(largeButtonHeight - self.SelectedCornerTopRight:GetHeight() - self.SelectedCornerBottomRight:GetHeight())
-    self.HoverLeft:SetHeight(largeButtonHeight - self.HoverCornerTopLeft:GetHeight() - self.HoverCornerBottomLeft:GetHeight())
-    self.HoverRight:SetHeight(largeButtonHeight - self.HoverCornerTopRight:GetHeight() - self.HoverCornerBottomRight:GetHeight())
+    self:SetHeight(largeButtonHeight);
+    self.BgLeft:SetHeight(largeButtonHeight - self.BgCornerTopLeft:GetHeight() - self.BgCornerBottomLeft:GetHeight());
+    self.BgRight:SetHeight(largeButtonHeight - self.BgCornerTopRight:GetHeight() - self.BgCornerBottomRight:GetHeight());
+    self.SelectedLeft:SetHeight(largeButtonHeight - self.SelectedCornerTopLeft:GetHeight() - self.SelectedCornerBottomLeft:GetHeight());
+    self.SelectedRight:SetHeight(largeButtonHeight - self.SelectedCornerTopRight:GetHeight() - self.SelectedCornerBottomRight:GetHeight());
+    self.HoverLeft:SetHeight(largeButtonHeight - self.HoverCornerTopLeft:GetHeight() - self.HoverCornerBottomLeft:GetHeight());
+    self.HoverRight:SetHeight(largeButtonHeight - self.HoverCornerTopRight:GetHeight() - self.HoverCornerBottomRight:GetHeight());
+    self.ApplyButton:Show();
+    self.AddButton:Show();
+    self.RemoveButton:Show();
 end
 
 function OutfitsTransmogButtonMixin:Collapse()
     local buttonHeight = self:GetParent():GetParent().buttonHeight;
-    self:SetHeight(buttonHeight)
-    self.BgLeft:SetHeight(buttonHeight - self.BgCornerTopLeft:GetHeight() - self.BgCornerBottomLeft:GetHeight())
-    self.BgRight:SetHeight(buttonHeight - self.BgCornerTopRight:GetHeight() - self.BgCornerBottomRight:GetHeight())
-    self.SelectedLeft:SetHeight(buttonHeight - self.SelectedCornerTopLeft:GetHeight() - self.SelectedCornerBottomLeft:GetHeight())
-    self.SelectedRight:SetHeight(buttonHeight - self.SelectedCornerTopRight:GetHeight() - self.SelectedCornerBottomRight:GetHeight())
-    self.HoverLeft:SetHeight(buttonHeight - self.HoverCornerTopLeft:GetHeight() - self.HoverCornerBottomLeft:GetHeight())
-    self.HoverRight:SetHeight(buttonHeight - self.HoverCornerTopRight:GetHeight() - self.HoverCornerBottomRight:GetHeight())
+    self:SetHeight(buttonHeight);
+    self.BgLeft:SetHeight(buttonHeight - self.BgCornerTopLeft:GetHeight() - self.BgCornerBottomLeft:GetHeight());
+    self.BgRight:SetHeight(buttonHeight - self.BgCornerTopRight:GetHeight() - self.BgCornerBottomRight:GetHeight());
+    self.SelectedLeft:SetHeight(buttonHeight - self.SelectedCornerTopLeft:GetHeight() - self.SelectedCornerBottomLeft:GetHeight());
+    self.SelectedRight:SetHeight(buttonHeight - self.SelectedCornerTopRight:GetHeight() - self.SelectedCornerBottomRight:GetHeight());
+    self.HoverLeft:SetHeight(buttonHeight - self.HoverCornerTopLeft:GetHeight() - self.HoverCornerBottomLeft:GetHeight());
+    self.HoverRight:SetHeight(buttonHeight - self.HoverCornerTopRight:GetHeight() - self.HoverCornerBottomRight:GetHeight());
+    self.ApplyButton:Hide();
+    self.AddButton:Hide();
+    self.RemoveButton:Hide();
 end
 
 function OutfitsTransmogButtonMixin:OpenVariantSetsDropDown()
@@ -336,7 +379,7 @@ function OutfitsTransmogButtonMixin:DisplayItems()
     local currentSelectedSetID = self:GetParent():GetParent():GetParent():GetSelectedSetID()
     local selectedBaseSetID = currentSelectedSetID and DP:C_GetBaseSetID(currentSelectedSetID)
     local Model = _G["SetMasterTransmogModelFrame"];
-    
+
     local sources = DP:GetSortedSetSources(self.setID);
     self.itemFramesPool:ReleaseAll();
     for j = 1, #sources do
@@ -346,11 +389,21 @@ function OutfitsTransmogButtonMixin:DisplayItems()
         itemFrame.itemID = sourceInfo.itemID;
         itemFrame.collected = sourceInfo.isCollected;
         itemFrame.invType = sourceInfo.invType;
+        itemFrame.visualID = sourceInfo.visualID;
         local texture = C_TransmogCollection.GetSourceIcon(sources[j].sourceID);
         itemFrame.Icon:SetTexture(texture);
         itemFrame:Show();
+---@diagnostic disable-next-line: undefined-field
         itemFrame.Red:SetShown(sourceInfo.useError ~= nil and sourceInfo.isCollected);
         itemFrame.Red:SetAlpha(0.45)
+        local equippedVisual = DP:GetEquippedVisual(C_Transmog.GetSlotForInventoryType(itemFrame.invType));
+        local pendingVisual, hasUndo = DP:GetPendingVisual(C_Transmog.GetSlotForInventoryType(itemFrame.invType));
+        local undoThisItem = hasUndo and equippedVisual == itemFrame.visualID;
+        itemFrame.StatusBorder:SetShown(itemFrame.visualID == equippedVisual and not hasUndo);
+        itemFrame.Glow:SetShown(itemFrame.visualID == pendingVisual or undoThisItem);
+        itemFrame.Ants:SetShown(itemFrame.visualID == pendingVisual or undoThisItem);
+        itemFrame.Undo:SetShown(undoThisItem);
+
         if ( sourceInfo.isCollected ) then
             itemFrame.Icon:SetDesaturated(false);
             itemFrame.Icon:SetAlpha(1);
@@ -375,25 +428,34 @@ function OutfitsTransmogButtonMixin:DisplayItems()
         self:SetItemFrameQuality(itemFrame)
 
         if (self.baseSetID ~= selectedBaseSetID) then
+            local FRAME_SIZE = 19;
             itemFrame:SetScript("OnEnter", nil);
             itemFrame:EnableMouse(false)
-            itemFrame:SetPoint("TOPLEFT", self.Name, "BOTTOMLEFT",  (j-1) * 20, -2);
-            itemFrame:SetSize(19,19)
+            itemFrame:SetPoint("TOPLEFT", self.Name, "BOTTOMLEFT",  (j-1) * (FRAME_SIZE + 1), -2);
+            itemFrame:SetSize(FRAME_SIZE,FRAME_SIZE)
             itemFrame.IconBorder:ClearAllPoints();
             itemFrame.IconBorder:SetPoint("TOPLEFT", itemFrame.Icon, "TOPLEFT", -4, 4)
             itemFrame.IconBorder:SetPoint("BOTTOMRIGHT", itemFrame.Icon, "BOTTOMRIGHT", 4, -4)
-            itemFrame.IconBorder:SetSize(19,19)
-            itemFrame.Icon:SetSize(15, 15);
+            itemFrame.IconBorder:SetSize(FRAME_SIZE,FRAME_SIZE)
+            itemFrame.Icon:SetSize(FRAME_SIZE - 4, FRAME_SIZE - 4);
+            itemFrame.StatusBorder:SetSize(FRAME_SIZE + 14, FRAME_SIZE + 15);
+            itemFrame.Glow:SetSize(FRAME_SIZE + 14, FRAME_SIZE + 15);
+            itemFrame.Ants:SetSize(FRAME_SIZE + 5, FRAME_SIZE + 6);
         else
+            local FRAME_SIZE = 26;
             itemFrame:EnableMouse(true)
             itemFrame:SetScript("OnEnter", TransmogItemFrame_OnEnter);
-            itemFrame:SetPoint("TOPLEFT", self.Name, "BOTTOMLEFT",  (j-1) * 27, -2);
-            itemFrame:SetSize(26,26)
+            itemFrame:SetPoint("TOPLEFT", self.Name, "BOTTOMLEFT",  (j-1) * (FRAME_SIZE + 1), -2);
+            itemFrame:SetSize(FRAME_SIZE, FRAME_SIZE)
             itemFrame.IconBorder:ClearAllPoints();
             itemFrame.IconBorder:SetPoint("TOPLEFT", itemFrame.Icon, "TOPLEFT", -4, 4)
             itemFrame.IconBorder:SetPoint("BOTTOMRIGHT", itemFrame.Icon, "BOTTOMRIGHT", 4, -4)
-            itemFrame.IconBorder:SetSize(26,26)
-            itemFrame.Icon:SetSize(22, 22);
+            itemFrame.IconBorder:SetSize(FRAME_SIZE, FRAME_SIZE)
+            itemFrame.Icon:SetSize(FRAME_SIZE - 4, FRAME_SIZE - 4);
+            itemFrame.StatusBorder:SetSize(FRAME_SIZE, FRAME_SIZE);
+            itemFrame.StatusBorder:SetSize(FRAME_SIZE + 14, FRAME_SIZE + 15);
+            itemFrame.Glow:SetSize(FRAME_SIZE + 14, FRAME_SIZE + 15);
+            itemFrame.Ants:SetSize(FRAME_SIZE + 5, FRAME_SIZE + 6);
         end
     end
 end
@@ -448,21 +510,193 @@ function OutfitsTransmogButtonModelMixin:OnUpdate()
     local uiScale, x, y = self:GetEffectiveScale(), GetCursorPosition();
     
     self:ClearAllPoints();
-    self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", (x / uiScale) + 2, (y / uiScale) + 2)
+    self:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", (x / uiScale) - 2, (y / uiScale) + 2)
 end
 
-SetMasterItemTransmogFrameMixin = {}
+SetMasterItemTransmogFrameMixin = {};
 
 function SetMasterItemTransmogFrameMixin:OnShow()
+    local itemFrame = GetMouseFocus();
+
+    if (not itemFrame or not itemFrame.invType) then
+        return;
+    end
+
+    self.oldslot = self.slot;
+    local slotType = C_Transmog.GetSlotForInventoryType(itemFrame.invType);
+    self.slot = TransmogUtil.CreateTransmogLocation(slotType, Enum.TransmogType.Appearance, Enum.TransmogModification.None);
+
+    self:ChangeModelsSlot();
+
 	if ( self.needsReload ) then
 		self:Reload(self.slot);
 	end
+    if (self.slot:IsEitherHand()) then
+        self:SetItem(itemFrame.itemID);
+    else
+        self:TryOn(itemFrame.sourceID);
+    end
+    self.cameraID = C_TransmogCollection.GetAppearanceCameraIDBySource(itemFrame.sourceID);
+    Model_ApplyUICamera(self, self.cameraID);
 end
 
-function SetMasterItemTransmogFrameMixin:OnUpdate()
-    local uiScale, x, y = UIParent:GetEffectiveScale(), GetCursorPosition();
-    
-    self:ClearAllPoints();
-    self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", (x / uiScale) + 2, (y / uiScale) + 2)
+function SetMasterItemTransmogFrameMixin:ChangeModelsSlot()
+    local undressSlot, reloadModel;
+    local newSlotIsArmor = self.slot:GetArmorCategoryID();
+    local oldSlotName = self.oldSlot and self.oldSlot:GetSlotName();
+    local newSlotName = self.slot and self.slot:GetSlotName();
 
+    if (newSlotIsArmor) then
+        local oldSlotIsArmor = self.OldSlot and self.oldSlot:GetArmorCategoryID();
+        if (oldSlotIsArmor) then
+            if(SETMASTER_WARDROBE_MODEL_SETUP[oldSlotName].useTransmogSkin ~= SETMASTER_WARDROBE_MODEL_SETUP[newSlotName].useTransmogSkin) then
+                reloadModel = true;
+            else
+                undressSlot = true;
+            end
+        else
+            reloadModel = true;
+        end
+    end
+
+    if (reloadModel and not IsUnitModelReadyForUI("player")) then
+        self:ClearModel();
+        return;
+    end
+
+    if (undressSlot) then
+        local changedOldSlot = false;
+
+        for slot, equip in pairs(SETMASTER_WARDROBE_MODEL_SETUP[newSlotName].slots) do
+            if (equip ~= SETMASTER_WARDROBE_MODEL_SETUP[oldSlotName].slots[newSlotName]) then
+                if (equip) then
+                    self:TryOn(SETMASTER_WARDROBE_MODEL_SETUP_GEAR(newSlotName));
+                else
+                    self:UndressSlot(GetInventorySlotInfo(newSlotName));
+                end
+                if (newSlotName == oldSlotName) then
+                    changedOldSlot = true;
+                end
+            end
+        end
+
+        if (not changedOldSlot) then
+            local slotID = GetInventorySlotInfo(oldSlotName);
+            self:UndressSlot(slotID);
+        end
+    elseif (reloadModel) then
+        self:Reload();
+    end
+    self.visualInfo= nil;
+    self.illusionWeaponID = nil;
+end
+
+function SetMasterItemTransmogFrameMixin:Reload()
+    local slot = self.slot:GetSlotName();
+    if (self:IsShown()) then
+        if (SETMASTER_WARDROBE_MODEL_SETUP[slot]) then
+            self:SetUseTransmogSkin(SETMASTER_WARDROBE_MODEL_SETUP[slot].useTransmogSkin);
+            self:SetUnit("player", false);
+            self:SetDoBlend(false);
+            for itemSlot, equip in pairs(SETMASTER_WARDROBE_MODEL_SETUP[slot].slots) do
+                if (equip) then
+                    self:TryOn(SETMASTER_WARDROBE_MODEL_SETUP_GEAR[itemSlot]);
+                end
+            end
+        end
+        self:SetKeepModelOnHide(true);
+        self.cameraID = nil;
+        self.needsReload = nil;
+    else
+        self.needsReload = true;
+    end
+end
+
+function TransmogItemFrame_OnMouseDown(self, button)
+    if (not self.invType) then
+        return;
+    end
+    if (self.collected) then
+        local transmogLocation = TransmogUtil.CreateTransmogLocation(C_Transmog.GetSlotForInventoryType(self.invType), Enum.TransmogType.Appearance, Enum.TransmogModification.None)
+        local isTransmogrified, hasPending = C_Transmog.GetSlotInfo(transmogLocation);
+        if (button == "LeftButton") then
+            C_Transmog.SetPending(transmogLocation, self.sourceID);
+        elseif (button == "RightButton") then
+            if(hasPending) then
+                C_Transmog.ClearPending(transmogLocation);
+            elseif(isTransmogrified) then
+                C_Transmog.SetPending(transmogLocation, 0);
+            end
+        end
+    end
+end
+
+function ApplyButton_OnMouseDown(self)
+    if (not self:IsEnabled()) then
+        return;
+    end
+
+    local itemFrames = self:GetParent().itemFramesPool;
+    C_Transmog.ClearAllPending();
+    for itemFrame in itemFrames:EnumerateActive() do
+        local transmogLocation = TransmogUtil.CreateTransmogLocation(
+                                                                    C_Transmog.GetSlotForInventoryType(itemFrame.invType),
+                                                                    Enum.TransmogType.Appearance, 
+                                                                    Enum.TransmogModification.None);
+
+        if (itemFrame.collected) then
+            C_Transmog.SetPending(transmogLocation, itemFrame.sourceID);
+        end
+    end
+    local cost = C_Transmog.GetCost();
+    local variants = "";
+    if (self:GetParent().VariantSetsButton:IsShown()) then
+        variants = " ("..self:GetParent().VariantSetsButton:GetText()..")";
+    end
+    local check = CreateFrame("CheckButton", "SetMastercheckButton", UIParent, "UICheckButtonTemplate");
+---@diagnostic disable-next-line: undefined-field
+    check.text:SetText("Do not show again");
+    if (not SM.db.char.acceptedTransmogMoneyRisk) then 
+        StaticPopup_Show("SETMASTER_APPLY_SET", self:GetParent().Name:GetText()..variants, GetCoinTextureString(cost), nil, check);
+    else
+        C_Transmog.ApplyAllPending();
+    end
+end
+
+function AddButton_OnMouseDown(self)
+    if (not self:IsEnabled()) then
+        return;
+    end
+    local itemFrames = self:GetParent().itemFramesPool;
+    for itemFrame in itemFrames:EnumerateActive() do
+        local transmogLocation = TransmogUtil.CreateTransmogLocation(
+                                                                    C_Transmog.GetSlotForInventoryType(itemFrame.invType),
+                                                                    Enum.TransmogType.Appearance,
+                                                                    Enum.TransmogModification.None)
+        if (itemFrame.collected) then
+            C_Transmog.SetPending(transmogLocation, itemFrame.sourceID);
+        end
+    end
+end
+
+function RemoveButton_OnMouseDown(self)
+    if (not self:IsEnabled()) then
+        return;
+    end
+    local itemFrames = self:GetParent().itemFramesPool;
+    for itemFrame in itemFrames:EnumerateActive() do
+        local transmogLocation = TransmogUtil.CreateTransmogLocation(
+                                                                    C_Transmog.GetSlotForInventoryType(itemFrame.invType),
+                                                                    Enum.TransmogType.Appearance,
+                                                                    Enum.TransmogModification.None)
+        if (itemFrame.collected) then
+            if (IsShiftKeyDown()) then
+                if (DP:GetEquippedVisual(C_Transmog.GetSlotForInventoryType(itemFrame.invType)) == itemFrame.visualID) then
+                    C_Transmog.SetPending(transmogLocation, 0);
+                end
+            else
+                C_Transmog.ClearPending(transmogLocation);
+            end
+        end
+    end
 end
